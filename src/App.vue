@@ -1,79 +1,44 @@
 <template>
-  <div id="app">
-    <label>名前</label>
-    <input type="text" v-model="userName" />
-
-    <label>メッセージ</label>
-    <input type="text" v-model="message" />
-    <button @click="sendMessage">送信</button>
-    <ul>
-      <li v-for="(value, key, index) in messageList" v-bind:key="index">
-        {{ value.user_name }}
-        <span style="margin-left:100px;">{{ value.message }}</span>
-      </li>
-    </ul>
-  </div>
+  <v-app id="app">
+    <v-app-bar dense dark app>
+      <v-tabs v-model="tab" grow>
+        <v-tab href="#tab-1">ステータス</v-tab>
+        <v-tab href="#tab-2">血液検査履歴</v-tab>
+        <v-tab href="#tab-3">治療履歴</v-tab>
+      </v-tabs>
+    </v-app-bar>
+    <v-tabs-items v-model="tab">
+      <v-tab-item value="tab-1">
+        <DashBoard />
+      </v-tab-item>
+      <v-tab-item value="tab-2">
+        <TheBloodTestLogTable />
+      </v-tab-item>
+      <v-tab-item value="tab-3">
+        <v-main>
+          <TheTreatmentLogTable />
+        </v-main>
+      </v-tab-item>
+    </v-tabs-items>
+  </v-app>
 </template>
 
 <script>
-import firebase from "firebase";
-let messageRef;
+import DashBoard from "./components/DashBoard.vue";
+import TheBloodTestLogTable from "./components/TheBloodTestLogTable.vue";
+import TheTreatmentLogTable from "./components/TheTreatmentLogTable.vue";
 
 export default {
   name: "app",
-  data() {
+  components: {
+    DashBoard,
+    TheBloodTestLogTable,
+    TheTreatmentLogTable,
+  },
+  data: () => {
     return {
-      messageList: [],
-      userName: "ユーザーA",
-      message: "テストメッセージです",
+      tab: null,
     };
-  },
-  created: function() {
-    // Your web app's Firebase configuration
-    var firebaseConfig = {
-      apiKey: "AIzaSyDVcyZ2-Fw7kXVE1N2weqtc7l_ePK48JwI",
-      authDomain: "facilitater-c58c5.firebaseapp.com",
-      databaseURL: "https://facilitater-c58c5.firebaseio.com",
-      projectId: "facilitater-c58c5",
-      storageBucket: "facilitater-c58c5.appspot.com",
-      messagingSenderId: "906277573957",
-      appId: "1:906277573957:web:817d6edcec4a64b8965a2c",
-      measurementId: "G-2LWS6Y6V2L",
-    };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    firebase.analytics();
-
-    const db = firebase.firestore();
-    messageRef = db.collection("chat_messages");
-
-    let messageList = this.messageList;
-    messageRef.orderBy("created", "desc").onSnapshot(function(qs) {
-      messageList.length = 0;
-      qs.forEach((result) => {
-        messageList.push(result.data());
-      });
-    });
-  },
-  methods: {
-    sendMessage: function() {
-      messageRef.add({
-        user_name: this.userName,
-        message: this.message,
-        created: new Date().getTime(),
-      });
-    },
   },
 };
 </script>
-
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
